@@ -13,13 +13,13 @@ public class MyBot : IChessBot {
     Move defaultMove(Board board) {
         var mates = checkmateMoves(board);
         if (mates.Count > 0) return mates[0];
-        //var checks = checkMoves(board);
-        //if (checks.Count > 0) return mostForcingMoves(board, checks.ToArray())[0];
+        var checks = checkMoves(board);
+        if (checks.Count > 0) return mostForcingMoves(board, checks.ToArray())[0];
         var legalMoves = board.GetLegalMoves();
         var promos = legalMoves.Where(m => m.IsPromotion && m.PromotionPieceType == PieceType.Queen).ToArray();
         if (promos.Length > 0) return mostForcingMoves(board, promos)[0];
-        //var castles = legalMoves.Where(m => m.IsCastles).ToArray();
-        //if (castles.Length > 0) return mostForcingMoves(board, castles)[0];
+        var castles = legalMoves.Where(m => m.IsCastles).ToArray();
+        if (castles.Length > 0) return mostForcingMoves(board, castles)[0];
         var captures = bestCaptureMoves(board);
         if (captures.Length > 0) return mostForcingMoves(board, captures)[0];
         return mostForcingMoves(board, legalMoves)[0];
@@ -45,7 +45,6 @@ public class MyBot : IChessBot {
         return myMoves;
     }
 
-    /*
     List<Move> checkMoves(Board board) {
         var myMoves = new List<Move>();
         foreach (Move m in board.GetLegalMoves()) {
@@ -57,7 +56,6 @@ public class MyBot : IChessBot {
         }
         return myMoves;
     }
-    */
 
     Move[] bestCaptureMoves(Board board) {
         var captures = board.GetLegalMoves().Where(m => m.IsCapture);
