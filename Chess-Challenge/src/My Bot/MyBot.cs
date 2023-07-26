@@ -20,8 +20,8 @@ public class MyBot : IChessBot {
         if (promos.Length > 0) return mostForcingMoves(board, promos)[0];
         //var castles = legalMoves.Where(m => m.IsCastles).ToArray();
         //if (castles.Length > 0) return mostForcingMoves(board, castles)[0];
-        //var captures = legalMoves.Where(m => m.IsCapture).ToArray();
-        //if (captures.Length > 0) return mostForcingMoves(board, captures)[0];
+        var captures = bestCaptureMoves(board);
+        if (captures.Length > 0) return mostForcingMoves(board, captures)[0];
         return mostForcingMoves(board, legalMoves)[0];
     }
 
@@ -58,6 +58,19 @@ public class MyBot : IChessBot {
         return myMoves;
     }
     */
+
+    Move[] bestCaptureMoves(Board board) {
+        var captures = board.GetLegalMoves().Where(m => m.IsCapture);
+        var queenCaptures = captures.Where(m => m.CapturePieceType == PieceType.Queen).ToArray();
+        if (queenCaptures.Length > 0) return queenCaptures;
+        var rookCaptures = captures.Where(m => m.CapturePieceType == PieceType.Rook).ToArray();
+        if (rookCaptures.Length > 0) return rookCaptures;
+        var bishopCaptures = captures.Where(m => m.CapturePieceType == PieceType.Bishop).ToArray();
+        if (bishopCaptures.Length > 0) return bishopCaptures;
+        var knightCaptures = captures.Where(m => m.CapturePieceType == PieceType.Knight).ToArray();
+        if (knightCaptures.Length > 0) return knightCaptures;
+        return captures.ToArray();
+    }
 
     // Moves that give the opponent the fewest options.
     List<Move> mostForcingMoves(Board board, Move[] candidateMoves) {
