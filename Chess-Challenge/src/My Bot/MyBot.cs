@@ -8,9 +8,14 @@ public class MyBot : IChessBot {
         turnsElapsed = 0;
     }
 
-    // Default move.
-    Move def(Board board) {
-        return mostForcingMoves(board)[0];
+    // Default move strategy.
+    Move defaultMove(Board board) {
+        var mates = checkmateMoves(board);
+        if (mates.Count > 0) return mates[0];
+        //var checks = checkMoves(board);
+        //if (checks.Count > 0) return mostForcingMoves(board, checks.ToArray())[0];
+        var legalMoves = board.GetLegalMoves();
+        return mostForcingMoves(board, legalMoves)[0];
     }
 
     // Try to make the given move, make default move otherwise.
@@ -18,14 +23,40 @@ public class MyBot : IChessBot {
         var move = new Move(moveName, board);
         foreach (Move m in board.GetLegalMoves())
             if (move.StartSquare == m.StartSquare && move.TargetSquare == m.TargetSquare) return move;
-        return def(board);
+        return defaultMove(board);
     }
 
-    // Moves that give the opponent the fewest options.
-    List<Move> mostForcingMoves(Board board) {
-        int maxMoves = 300;
+    List<Move> checkmateMoves(Board board) {
         var myMoves = new List<Move>();
         foreach (Move m in board.GetLegalMoves()) {
+            board.MakeMove(m);
+            if (board.IsInCheckmate()) {
+                myMoves.Add(m);
+            }
+            board.UndoMove(m);
+        }
+        return myMoves;
+    }
+
+    /*
+    List<Move> checkMoves(Board board) {
+        var myMoves = new List<Move>();
+        foreach (Move m in board.GetLegalMoves()) {
+            board.MakeMove(m);
+            if (board.IsInCheck()) {
+                myMoves.Add(m);
+            }
+            board.UndoMove(m);
+        }
+        return myMoves;
+    }
+    */
+
+    // Moves that give the opponent the fewest options.
+    List<Move> mostForcingMoves(Board board, Move[] candidateMoves) {
+        int maxMoves = 300;
+        var myMoves = new List<Move>();
+        foreach (Move m in candidateMoves) {
             board.MakeMove(m);
             var opponentMovesAmount = board.GetLegalMoves().Length;
             if (opponentMovesAmount <= maxMoves) {
@@ -46,7 +77,7 @@ public class MyBot : IChessBot {
                 if (board.GameMoveHistory[0].TargetSquare.Name == "e4") return withDefault("b8c6", board); // Nimzowitsch
                 return withDefault("e7e6", board); // Horwitz or similar
             }
-            return def(board);
+            return defaultMove(board);
         } finally {
             turnsElapsed++;
         }
